@@ -5,7 +5,6 @@ from food_product import FoodProduct
 class TestFoodProduct(unittest.TestCase):
 
     def setUp(self) -> None:
-        """Підготовка об'єкта перед кожним тестом."""
         self.product = FoodProduct(
             name="Banana",
             calories_per_100g=89.0,
@@ -15,7 +14,6 @@ class TestFoodProduct(unittest.TestCase):
         )
 
     def test_create_and_getters(self) -> None:
-        """Тест 1: Перевірка ініціалізації та геттерів."""
         self.assertEqual(self.product.get_name(), "Banana")
         self.assertEqual(self.product.get_calories_per_100g(), 89.0)
         self.assertEqual(self.product.get_protein_per_100g(), 1.1)
@@ -23,7 +21,6 @@ class TestFoodProduct(unittest.TestCase):
         self.assertEqual(self.product.get_carbs_per_100g(), 22.8)
 
     def test_calculate_nutrition(self) -> None:
-        """Тест 2: Перевірка розрахунку КБЖВ для 150г."""
         weight = 150.0
         expected_nutrition = {
             "calories": 133.5,
@@ -37,7 +34,6 @@ class TestFoodProduct(unittest.TestCase):
         )
 
     def test_invalid_weight(self) -> None:
-        """Тест 3: Перевірка некоректної ваги (-50г)."""
         with self.assertRaises(ValueError):
             self.product.calculate_nutrition_for_weight(-50.0)
 
