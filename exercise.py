@@ -39,3 +39,9 @@ class Exercise:
             "duration_min": duration_min,
             "calories": calories,
         }
+
+    def to_dict(self) -> dict:
+        return {"activity_type": self.__activity_type, "met": self.__met}
+
+    def __str__(self) -> str:
+        return f"{self.__name} ({self.__activity_type}, MET={self.__met})"
