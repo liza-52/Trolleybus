@@ -1,7 +1,6 @@
 from exercise import Exercise
 from workout_part import WorkoutPart
 
-
 class Workout:
     def __init__(self, name: str, weight_kg: float) -> None:
         if weight_kg <= 0:
