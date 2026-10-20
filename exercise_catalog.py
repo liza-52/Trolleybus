@@ -2,7 +2,6 @@ import json
 import os
 
 from exercise import Exercise
-from workout import Workout
 
 DEFAULT_EXERCISES = {
     "Біг": {"activity_type": "кардіо", "met": 9.8},
@@ -59,13 +58,6 @@ class ExerciseCatalog:
         del self.__exercises[name]
         self.__save_exercises()
         return exercise
-
-    def create_workout(self, workout_name: str, weight_kg: float) -> Workout:
-        return Workout(workout_name, weight_kg)
-
-    def add_to_workout(self, workout: Workout, exercise_name: str, duration_min: float) -> None:
-        exercise = self.get_exercise(exercise_name)
-        workout.add_part(exercise, duration_min)
 
     def calculate_calories_for(self, name: str, weight_kg: float, duration_min: float) -> dict:
         exercise = self.get_exercise(name)
