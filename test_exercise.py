@@ -1,4 +1,7 @@
+import os
+
 from exercise import Exercise
+from workout import Workout
 from exercise_catalog import ExerciseCatalog
 
 
@@ -30,6 +33,8 @@ def run_test():
         print(f"Очікувана помилка (нульова тривалість): {e}")
 
     print("\n=== ТЕСТ КАТАЛОГУ ВПРАВ ===")
+    if os.path.exists("test_met_values.json"):
+        os.remove("test_met_values.json")
     catalog = ExerciseCatalog("test_met_values.json")
 
     print(f"Базові вправи у каталозі: {catalog.list_exercises()}")
@@ -55,6 +60,50 @@ def run_test():
         catalog.get_exercise("Танці")
     except ValueError as e:
         print(f"Очікувана помилка (вправи немає): {e}")
+
+    print("\n=== ТЕСТ КОМПОЗИЦІЇ (Workout -> WorkoutPart) ===")
+    workout = Workout("Ранкове тренування", weight_kg=70)
+    workout.add_part(catalog.get_exercise("Ходьба"), duration_min=10)
+    workout.add_part(catalog.get_exercise("Біг"), duration_min=30)
+    workout.add_part(catalog.get_exercise("Йога"), duration_min=20)
+    print(workout)
+    print(f"Загальна тривалість: {workout.get_total_duration()} хв")
+    print(f"Загальні калорії: {workout.get_total_calories()} ккал")
+    for info in workout.get_parts_info():
+        print(f"  {info['activity']}: {info['duration_min']} хв, {info['calories']} ккал")
+
+    try:
+        workout.add_part(catalog.get_exercise("Біг"), duration_min=0)
+    except ValueError as e:
+        print(f"Очікувана помилка (нульова тривалість частини): {e}")
+
+    try:
+        Workout("Погане тренування", weight_kg=0)
+    except ValueError as e:
+        print(f"Очікувана помилка (нульова вага): {e}")
+
+    try:
+        workout.add_part(catalog.get_exercise("Танці"), duration_min=15)
+    except ValueError as e:
+        print(f"Очікувана помилка (вправи немає у каталозі): {e}")
+
+    print("\n=== ТЕСТ АГРЕГАЦІЇ (вправа живе без каталогу) ===")
+    removed = catalog.remove_exercise("Бокс")
+    print(f"Каталог після видалення: {catalog.list_exercises()}")
+    print(f"Об'єкт вправи все ще існує: {removed}")
+
+    boxing_workout = Workout("Бокс вдома", weight_kg=65)
+    boxing_workout.add_part(removed, duration_min=30)
+    print(f"Калорії тренування з видаленою вправою: {boxing_workout.get_total_calories()} ккал")
+
+    catalog.remove_exercise("Йога")
+    print(f"Калорії ранкового тренування після видалення 'Йога' з каталогу: "
+          f"{workout.get_total_calories()} ккал")
+
+    try:
+        catalog.remove_exercise("Йога")
+    except ValueError as e:
+        print(f"Очікувана помилка (вправу вже видалено): {e}")
 
     print("\nВсі тести виконано успішно!")
 
