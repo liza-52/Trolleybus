@@ -1,45 +1,31 @@
 import json
+from meal import Meal
+from workout import Workout
 
 class DiaryEntry:
     def __init__(self, date_str: str) -> None:
         self.__date = date_str
-        self.__consumed_items = []
-        self.__exercises = []
+        self.__meals = []      
+        self.__workouts = []   
 
     def get_date(self) -> str:
         return self.__date
 
-    def add_food(self, food_item, weight_grams: float) -> None:
-        if weight_grams <= 0:
-            raise ValueError("Вага повинна бути більшою за 0")
-        self.__consumed_items.append({"item": food_item, "weight": weight_grams})
+    def add_meal(self, meal: Meal) -> None:
+        if meal is None:
+            raise ValueError("Прийом їжі не може бути порожнім")
+        self.__meals.append(meal)
 
-    def add_exercise(self, exercise_item, duration_min: float, user_weight_kg: float) -> None:
-        if duration_min <= 0 or user_weight_kg <= 0:
-            raise ValueError("Тривалість та вага мають бути більшими за 0")
-        self.__exercises.append({
-            "exercise": exercise_item,
-            "duration_min": duration_min,
-            "user_weight_kg": user_weight_kg
-        })
+    def add_workout(self, workout: Workout) -> None:
+        if workout is None:
+            raise ValueError("Тренування не може бути порожнім")
+        self.__workouts.append(workout)
 
     def get_consumed_calories(self) -> float:
-        total = 0.0
-        for entry in self.__consumed_items:
-            item = entry["item"]
-            weight = entry["weight"]
-            if hasattr(item, "calculate_nutrition_for_weight"):
-                total += item.calculate_nutrition_for_weight(weight)["calories"]
-            elif hasattr(item, "get_nutrition_per_serving"):
-                total += item.get_nutrition_per_serving(weight)["calories"]
-        return round(total, 2)
+        return round(sum(meal.get_total_calories() for meal in self.__meals), 2)
 
     def get_burned_calories(self) -> float:
-        total = 0.0
-        for entry in self.__exercises:
-            ex = entry["exercise"]
-            total += ex.calculate_calories(entry["user_weight_kg"], entry["duration_min"])["calories"]
-        return round(total, 2)
+        return round(sum(workout.get_total_calories() for workout in self.__workouts), 2)
 
     def get_daily_balance(self) -> float:
         return round(self.get_consumed_calories() - self.get_burned_calories(), 2)
@@ -49,7 +35,7 @@ class DiaryEntry:
         burned = self.get_burned_calories()
         if burned >= 500:
             achievements.append("Спалювач калорій (більше 500 ккал за день)")
-        if len(self.__exercises) >= 2:
+        if len(self.__workouts) >= 2:
             achievements.append("Подвійний удар (2+ тренування за день)")
         return achievements
 
