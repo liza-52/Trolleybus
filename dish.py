@@ -50,7 +50,7 @@ class Dish:
     def get_calories_per_100g(self) -> float:
         return round((self.__total_calories / self.__total_weight_grams) * 100.0, 2)
 
-    def get_nutrition_per_serving(self, serving_weight_grams: float) -> dict:
+    def get_nutrition(self, serving_weight_grams: float) -> dict:
         if serving_weight_grams <= 0:
             raise ValueError("Вага порції менша за 0")
 

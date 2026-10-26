@@ -29,13 +29,13 @@ class TestFoodProduct(unittest.TestCase):
             "carbs": 34.2,
         }
         self.assertEqual(
-            self.product.calculate_nutrition_for_weight(weight),
+            self.product.get_nutrition(weight),
             expected_nutrition,
         )
 
     def test_invalid_weight(self) -> None:
         with self.assertRaises(ValueError):
-            self.product.calculate_nutrition_for_weight(-50.0)
+            self.product.get_nutrition(-50.0)
 
 
 if __name__ == "__main__":

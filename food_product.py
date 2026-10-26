@@ -37,7 +37,7 @@ class FoodProduct:
     def get_carbs_per_100g(self) -> float:
         return self.__carbs_per_100g
 
-    def calculate_nutrition_for_weight(self, weight_grams: float) -> dict:
+    def get_nutrition(self, weight_grams: float) -> dict:
         if weight_grams <= 0:
             raise ValueError("Вага порції має бути більшою за 0!")
 

@@ -32,7 +32,7 @@ class TestDish(unittest.TestCase):
             "fat": 10.0,
             "carbs": 5.0,
         }
-        self.assertEqual(self.dish.get_nutrition_per_serving(100.0), expected)
+        self.assertEqual(self.dish.get_nutrition(100.0), expected)
 
     def test_macro_ratios(self) -> None:
         ratios = self.dish.get_macro_ratios()
@@ -50,7 +50,7 @@ class TestDish(unittest.TestCase):
 
     def test_invalid_serving_weight_raises_error(self) -> None:
         with self.assertRaises(ValueError):
-            self.dish.get_nutrition_per_serving(-50.0)
+            self.dish.get_nutrition(-50.0)
 
     def test_macro_ratios_with_zero_macros(self) -> None:
         water = Dish("Water", 500.0, 0.0, 0.0, 0.0, 0.0)

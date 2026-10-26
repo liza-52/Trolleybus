@@ -17,9 +17,7 @@ class Meal:
         if not hasattr(item, "get_name") or not callable(getattr(item, "get_name")):
             raise TypeError("Об'єкт має реалізовувати метод get_name()!")
 
-        if not hasattr(item, "calculate_nutrition_for_weight") and not hasattr(
-            item, "get_nutrition_per_serving"
-        ):
+        if not hasattr(item, "get_nutrition") or not callable(getattr(item, "get_nutrition")):
             raise TypeError("Об'єкт повинен мати метод розрахунку КБЖВ!")
 
         if weight_grams <= 0:
@@ -76,9 +74,7 @@ class Meal:
         item = entry["item"]
         weight = entry["weight_grams"]
 
-        if hasattr(item, "calculate_nutrition_for_weight"):
-            return item.calculate_nutrition_for_weight(weight)
-        elif hasattr(item, "get_nutrition_per_serving"):
-            return item.get_nutrition_per_serving(weight)
+        if hasattr(item, "get_nutrition"):
+            return item.get_nutrition(weight)
         else:
             raise TypeError("Невідомий тип елемента прийому їжі!")
