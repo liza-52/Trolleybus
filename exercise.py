@@ -40,6 +40,9 @@ class Exercise:
             "calories": calories,
         }
 
+    def get_advice(self) -> str:
+        return "Займайтесь у комфортному темпі."
+
     def to_dict(self) -> dict:
         return {"activity_type": self.__activity_type, "met": self.__met}
 
