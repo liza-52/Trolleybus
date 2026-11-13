@@ -2,6 +2,7 @@ import json
 import os
 
 from exercise import Exercise
+from exercise_types import create_exercise
 
 DEFAULT_EXERCISES = {
     "Біг": {"activity_type": "кардіо", "met": 9.8},
@@ -27,7 +28,7 @@ class ExerciseCatalog:
             raw_data = json.load(f)
 
         for name, info in raw_data.items():
-            self.__exercises[name] = Exercise(name, info["activity_type"], info["met"])
+            self.__exercises[name] = create_exercise(name, info["activity_type"], info["met"])
 
     def __save_data(self, data: dict) -> None:
         with open(self.__filename, "w", encoding="utf-8") as f:
@@ -49,7 +50,7 @@ class ExerciseCatalog:
         if name in self.__exercises:
             raise ValueError(f"Вправа '{name}' вже існує у каталозі")
 
-        new_exercise = Exercise(name, activity_type, met)
+        new_exercise = create_exercise(name, activity_type, met)
         self.__exercises[name] = new_exercise
         self.__save_exercises()
 
@@ -58,6 +59,16 @@ class ExerciseCatalog:
         del self.__exercises[name]
         self.__save_exercises()
         return exercise
+
+    def search_by_name(self, text: str) -> list:
+        result = []
+        for exercise in self.__exercises.values():
+            if text.lower() in exercise.get_name().lower():
+                result.append(exercise)
+        return result
+
+    def list_sorted_by_met(self, reverse: bool = False) -> list:
+        return sorted(self.__exercises.values(), key=Exercise.get_met, reverse=reverse)
 
     def calculate_calories_for(self, name: str, weight_kg: float, duration_min: float) -> dict:
         exercise = self.get_exercise(name)
