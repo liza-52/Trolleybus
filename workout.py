@@ -1,5 +1,5 @@
-from exercise import Exercise
 from workout_part import WorkoutPart
+
 
 class Workout:
     def __init__(self, name: str, weight_kg: float) -> None:
@@ -16,9 +16,10 @@ class Workout:
     def get_weight_kg(self) -> float:
         return self.__weight_kg
 
-    def add_part(self, exercise: Exercise, duration_min: float) -> None:
-        part = WorkoutPart(exercise, duration_min)
+    def add_part(self, part_name: str) -> WorkoutPart:
+        part = WorkoutPart(part_name)
         self.__parts.append(part)
+        return part
 
     def get_parts_count(self) -> int:
         return len(self.__parts)
@@ -32,18 +33,18 @@ class Workout:
     def get_total_calories(self) -> float:
         total = 0.0
         for part in self.__parts:
-            total += part.calculate_calories(self.__weight_kg)["calories"]
+            total += part.calculate_calories(self.__weight_kg)
         return round(total, 2)
 
     def get_parts_info(self) -> list:
         info = []
         for part in self.__parts:
-            result = part.calculate_calories(self.__weight_kg)
             info.append(
                 {
-                    "activity": result["activity"],
-                    "duration_min": result["duration_min"],
-                    "calories": result["calories"],
+                    "part": part.get_name(),
+                    "exercises": part.get_exercise_names(),
+                    "duration_min": part.get_duration_min(),
+                    "calories": part.calculate_calories(self.__weight_kg),
                 }
             )
         return info

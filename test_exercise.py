@@ -61,31 +61,56 @@ def run_test():
     except ValueError as e:
         print(f"Очікувана помилка (вправи немає): {e}")
 
+    print("\n=== ТЕСТ ПОЛІМОРФІЗМУ: ВИДИ ВПРАВ ===")
+    for name in ["Біг", "Йога", "Силове тренування", "Бокс"]:
+        exercise = catalog.get_exercise(name)
+        calories = exercise.calculate_calories(weight_kg=70, duration_min=30)["calories"]
+        print(f"{type(exercise).__name__}: {name}, 30 хв, 70 кг -> {calories} ккал")
+        print(f"  Порада: {exercise.get_advice()}")
+
+    plain_strength = Exercise("Звичайна вправа", "сила", 6.0)
+    base_calories = plain_strength.calculate_calories(70, 30)["calories"]
+    strength_calories = catalog.get_exercise("Силове тренування").calculate_calories(70, 30)["calories"]
+    print(f"Та сама формула без підкласу: {base_calories} ккал, силова вправа: {strength_calories} ккал")
+
+    print("\n=== ТЕСТ ПОШУКУ І СОРТУВАННЯ ===")
+    print(f"Пошук 'біг': {[ex.get_name() for ex in catalog.search_by_name('біг')]}")
+    sorted_list = catalog.list_sorted_by_met(reverse=True)
+    print(f"За спаданням MET: {[ex.get_name() for ex in sorted_list]}")
+
+    print("\n=== ТЕСТ ЗБЕРЕЖЕННЯ І ВІДНОВЛЕННЯ ===")
+    restored = ExerciseCatalog("test_met_values.json")
+    print(f"Відновлено з файлу: {restored.list_exercises()}")
+    print(f"'Бокс' після відновлення: {type(restored.get_exercise('Бокс')).__name__}")
+    print(f"'Силове тренування' після відновлення: "
+          f"{type(restored.get_exercise('Силове тренування')).__name__}")
+
     print("\n=== ТЕСТ КОМПОЗИЦІЇ (Workout -> WorkoutPart) ===")
     workout = Workout("Ранкове тренування", weight_kg=70)
-    workout.add_part(catalog.get_exercise("Ходьба"), duration_min=10)
-    workout.add_part(catalog.get_exercise("Біг"), duration_min=30)
-    workout.add_part(catalog.get_exercise("Йога"), duration_min=20)
+
+    warmup = workout.add_part("Розминка")
+    warmup.add_exercise(catalog.get_exercise("Ходьба"), duration_min=10)
+    warmup.add_exercise(catalog.get_exercise("Йога"), duration_min=5)
+
+    main_part = workout.add_part("Основна частина")
+    main_part.add_exercise(catalog.get_exercise("Біг"), duration_min=30)
+    main_part.add_exercise(catalog.get_exercise("Силове тренування"), duration_min=15)
+
     print(workout)
     print(f"Загальна тривалість: {workout.get_total_duration()} хв")
     print(f"Загальні калорії: {workout.get_total_calories()} ккал")
     for info in workout.get_parts_info():
-        print(f"  {info['activity']}: {info['duration_min']} хв, {info['calories']} ккал")
+        print(f"  {info['part']}: {info['exercises']}, {info['duration_min']} хв, {info['calories']} ккал")
 
     try:
-        workout.add_part(catalog.get_exercise("Біг"), duration_min=0)
+        warmup.add_exercise(catalog.get_exercise("Біг"), duration_min=0)
     except ValueError as e:
-        print(f"Очікувана помилка (нульова тривалість частини): {e}")
+        print(f"Очікувана помилка (нульова тривалість вправи): {e}")
 
     try:
         Workout("Погане тренування", weight_kg=0)
     except ValueError as e:
         print(f"Очікувана помилка (нульова вага): {e}")
-
-    try:
-        workout.add_part(catalog.get_exercise("Танці"), duration_min=15)
-    except ValueError as e:
-        print(f"Очікувана помилка (вправи немає у каталозі): {e}")
 
     print("\n=== ТЕСТ АГРЕГАЦІЇ (вправа живе без каталогу) ===")
     removed = catalog.remove_exercise("Бокс")
@@ -93,7 +118,7 @@ def run_test():
     print(f"Об'єкт вправи все ще існує: {removed}")
 
     boxing_workout = Workout("Бокс вдома", weight_kg=65)
-    boxing_workout.add_part(removed, duration_min=30)
+    boxing_workout.add_part("Основна частина").add_exercise(removed, duration_min=30)
     print(f"Калорії тренування з видаленою вправою: {boxing_workout.get_total_calories()} ккал")
 
     catalog.remove_exercise("Йога")
