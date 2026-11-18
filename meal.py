@@ -1,4 +1,8 @@
+from nutrition_item import NutritionItem
+
+
 class Meal:
+
 
     def __init__(self, name: str) -> None:
         if not name or not isinstance(name, str) or not name.strip():
@@ -10,18 +14,16 @@ class Meal:
     def get_name(self) -> str:
         return self.__name
 
-    def add_item(self, item, weight_grams: float) -> None:
+    def add_item(self, item: NutritionItem, weight_grams: float) -> None:
+
         if item is None:
-            raise ValueError("Об'єкт продукту або страви не може бути порожнім!")
+            raise ValueError("Об'єкт продукту або страви не може бути None!")
 
-        if not hasattr(item, "get_name") or not callable(getattr(item, "get_name")):
-            raise TypeError("Об'єкт має реалізовувати метод get_name()!")
-
-        if not hasattr(item, "get_nutrition") or not callable(getattr(item, "get_nutrition")):
-            raise TypeError("Об'єкт повинен мати метод розрахунку КБЖВ!")
+        if not isinstance(item, NutritionItem):
+            raise TypeError("Об'єкт повинен успадковувати абстрактний клас NutritionItem!")
 
         if weight_grams <= 0:
-            raise ValueError("Вага порції має бути більшою за 0!")
+            raise ValueError("Вага порції або об'єм має бути більшим за 0!")
 
         self.__items.append({"item": item, "weight_grams": float(weight_grams)})
 
@@ -40,7 +42,6 @@ class Meal:
         return len(self.__items)
 
     def get_items(self) -> list:
- 
         return [
             {
                 "name": entry["item"].get_name(),
@@ -49,6 +50,33 @@ class Meal:
             }
             for entry in self.__items
         ]
+
+    def search_items_by_name(self, query: str) -> list:
+
+        if not query or not isinstance(query, str):
+            return []
+
+        search_str = query.strip().lower()
+        matched = []
+        for entry in self.__items:
+            if search_str in entry["item"].get_name().lower():
+                matched.append(
+                    {
+                        "name": entry["item"].get_name(),
+                        "weight_grams": entry["weight_grams"],
+                        "nutrition": self._get_entry_nutrition(entry),
+                    }
+                )
+        return matched
+
+    def get_sorted_items_by_calories(self, reverse: bool = True) -> list:
+
+        items_with_nutrition = self.get_items()
+        return sorted(
+            items_with_nutrition,
+            key=lambda x: x["nutrition"]["calories"],
+            reverse=reverse,
+        )
 
     def get_total_nutrition(self) -> dict:
         total = {"calories": 0.0, "protein": 0.0, "fat": 0.0, "carbs": 0.0}
@@ -73,8 +101,4 @@ class Meal:
     def _get_entry_nutrition(self, entry: dict) -> dict:
         item = entry["item"]
         weight = entry["weight_grams"]
-
-        if hasattr(item, "get_nutrition"):
-            return item.get_nutrition(weight)
-        else:
-            raise TypeError("Невідомий тип елемента прийому їжі!")
+        return item.get_nutrition(weight)
