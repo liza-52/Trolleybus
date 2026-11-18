@@ -1,4 +1,8 @@
-class FoodProduct:
+from nutrition_item import NutritionItem
+
+
+class FoodProduct(NutritionItem):
+
 
     def __init__(
         self,
@@ -8,15 +12,18 @@ class FoodProduct:
         fat_per_100g: float,
         carbs_per_100g: float,
     ) -> None:
+        if not name or not isinstance(name, str) or not name.strip():
+            raise ValueError("Назва продукту не може бути порожньою!")
+
         if (
             calories_per_100g < 0
             or protein_per_100g < 0
             or fat_per_100g < 0
             or carbs_per_100g < 0
         ):
-            raise ValueError("Калорії та БЖВ не можуть бути від'ємними!")
+            raise ValueError("Харчова цінність не може бути від'ємною!")
 
-        self.__name = name
+        self.__name = name.strip()
         self.__calories_per_100g = float(calories_per_100g)
         self.__protein_per_100g = float(protein_per_100g)
         self.__fat_per_100g = float(fat_per_100g)
@@ -38,13 +45,14 @@ class FoodProduct:
         return self.__carbs_per_100g
 
     def get_nutrition(self, weight_grams: float) -> dict:
+
         if weight_grams <= 0:
             raise ValueError("Вага порції має бути більшою за 0!")
 
-        coefficient = weight_grams / 100.0
+        factor = weight_grams / 100.0
         return {
-            "calories": round(self.__calories_per_100g * coefficient, 2),
-            "protein": round(self.__protein_per_100g * coefficient, 2),
-            "fat": round(self.__fat_per_100g * coefficient, 2),
-            "carbs": round(self.__carbs_per_100g * coefficient, 2),
+            "calories": round(self.__calories_per_100g * factor, 2),
+            "protein": round(self.__protein_per_100g * factor, 2),
+            "fat": round(self.__fat_per_100g * factor, 2),
+            "carbs": round(self.__carbs_per_100g * factor, 2),
         }
