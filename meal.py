@@ -192,7 +192,6 @@ class Meal:
         return meal
 
     def save_to_json(self, filename: str) -> None:
-        """Зберігає прийом їжі у окремий JSON-файл."""
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(self.to_dict(), f, ensure_ascii=False, indent=4)
 
