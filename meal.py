@@ -1,21 +1,23 @@
+import json
 from nutrition_item import NutritionItem
+from food_product import FoodProduct
+from dish import Dish
+from beverage_product import BeverageProduct
 
 
 class Meal:
-
 
     def __init__(self, name: str) -> None:
         if not name or not isinstance(name, str) or not name.strip():
             raise ValueError("Назва прийому їжі не може бути порожньою!")
 
         self.__name = name.strip()
-        self.__items = [] 
+        self.__items = []
 
     def get_name(self) -> str:
         return self.__name
 
     def add_item(self, item: NutritionItem, weight_grams: float) -> None:
-
         if item is None:
             raise ValueError("Об'єкт продукту або страви не може бути None!")
 
@@ -52,7 +54,6 @@ class Meal:
         ]
 
     def search_items_by_name(self, query: str) -> list:
-
         if not query or not isinstance(query, str):
             return []
 
@@ -70,7 +71,6 @@ class Meal:
         return matched
 
     def get_sorted_items_by_calories(self, reverse: bool = True) -> list:
-
         items_with_nutrition = self.get_items()
         return sorted(
             items_with_nutrition,
@@ -102,3 +102,103 @@ class Meal:
         item = entry["item"]
         weight = entry["weight_grams"]
         return item.get_nutrition(weight)
+
+    def to_dict(self) -> dict:
+        items_data = []
+        for entry in self.__items:
+            item = entry["item"]
+            weight = entry["weight_grams"]
+
+            if isinstance(item, FoodProduct):
+                item_dict = {
+                    "type": "FoodProduct",
+                    "name": item.get_name(),
+                    "calories_per_100g": item.get_calories_per_100g(),
+                    "protein_per_100g": item.get_protein_per_100g(),
+                    "fat_per_100g": item.get_fat_per_100g(),
+                    "carbs_per_100g": item.get_carbs_per_100g(),
+                }
+            elif isinstance(item, Dish):
+                macro = item.get_nutrition(item.get_total_weight_grams())
+                item_dict = {
+                    "type": "Dish",
+                    "name": item.get_name(),
+                    "total_weight_grams": item.get_total_weight_grams(),
+                    "total_calories": macro["calories"],
+                    "total_protein": macro["protein"],
+                    "total_fat": macro["fat"],
+                    "total_carbs": macro["carbs"],
+                }
+            elif isinstance(item, BeverageProduct):
+                item_dict = {
+                    "type": "BeverageProduct",
+                    "name": item.get_name(),
+                    "calories_per_100ml": item.get_calories_per_100ml(),
+                    "protein_per_100ml": 0.0,  # За наявності геттерів у BeverageProduct
+                    "fat_per_100ml": 0.0,
+                    "carbs_per_100ml": 0.0,
+                    "is_carbonated": item.is_carbonated(),
+                }
+            else:
+                continue
+
+            items_data.append({"item": item_dict, "weight_grams": weight})
+
+        return {"name": self.__name, "items": items_data}
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Meal":
+        if not isinstance(data, dict) or "name" not in data:
+            raise ValueError("Некоректні дані для відновлення Meal!")
+
+        meal = cls(data["name"])
+
+        for entry in data.get("items", []):
+            item_data = entry["item"]
+            weight = entry["weight_grams"]
+            item_type = item_data.get("type")
+
+            if item_type == "FoodProduct":
+                obj = FoodProduct(
+                    name=item_data["name"],
+                    calories_per_100g=item_data["calories_per_100g"],
+                    protein_per_100g=item_data["protein_per_100g"],
+                    fat_per_100g=item_data["fat_per_100g"],
+                    carbs_per_100g=item_data["carbs_per_100g"],
+                )
+            elif item_type == "Dish":
+                obj = Dish(
+                    name=item_data["name"],
+                    total_weight_grams=item_data["total_weight_grams"],
+                    total_calories=item_data["total_calories"],
+                    total_protein=item_data["total_protein"],
+                    total_fat=item_data["total_fat"],
+                    total_carbs=item_data["total_carbs"],
+                )
+            elif item_type == "BeverageProduct":
+                obj = BeverageProduct(
+                    name=item_data["name"],
+                    calories_per_100ml=item_data["calories_per_100ml"],
+                    protein_per_100ml=item_data.get("protein_per_100ml", 0.0),
+                    fat_per_100ml=item_data.get("fat_per_100ml", 0.0),
+                    carbs_per_100ml=item_data.get("carbs_per_100ml", 0.0),
+                    is_carbonated=item_data.get("is_carbonated", False),
+                )
+            else:
+                raise ValueError(f"Невідомий тип харчового елемента: {item_type}")
+
+            meal.add_item(obj, weight)
+
+        return meal
+
+    def save_to_json(self, filename: str) -> None:
+        """Зберігає прийом їжі у окремий JSON-файл."""
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(self.to_dict(), f, ensure_ascii=False, indent=4)
+
+    @classmethod
+    def load_from_json(cls, filename: str) -> "Meal":
+        """Завантажує прийом їжі з JSON-файлу."""
+        with open(filename, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return cls.from_dict(data)
