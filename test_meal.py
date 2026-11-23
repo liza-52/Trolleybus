@@ -1,3 +1,5 @@
+import tempfile
+import os
 import unittest
 from food_product import FoodProduct
 from dish import Dish
@@ -107,6 +109,28 @@ class TestMeal(unittest.TestCase):
 
         expected_calories = 411.5
         self.assertEqual(self.meal.get_total_calories(), expected_calories)
+
+    def test_save_and_load_json(self) -> None:
+        self.meal.add_item(self.banana, 150.0)
+        self.meal.add_item(self.omelet, 100.0)
+        self.meal.add_item(self.milk, 200.0)
+
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
+            temp_path = tmp.name
+
+        try:
+            self.meal.save_to_json(temp_path)
+            loaded_meal = Meal.load_from_json(temp_path)
+
+            self.assertEqual(loaded_meal.get_name(), "Сніданок")
+            self.assertEqual(loaded_meal.get_items_count(), 3)
+            self.assertEqual(
+                loaded_meal.get_total_nutrition(),
+                self.meal.get_total_nutrition(),
+            )
+        finally:
+            if os.path.exists(temp_path):
+                os.remove(temp_path) 
 
 
 if __name__ == "__main__":
