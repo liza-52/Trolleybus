@@ -39,8 +39,16 @@ class BeverageProduct(NutritionItem):
     def get_calories_per_100ml(self) -> float:
         return self.__calories_per_100ml
 
-    def get_nutrition(self, volume_ml: float) -> dict:
+    def get_protein_per_100ml(self) -> float:
+        return self.__protein_per_100ml
 
+    def get_fat_per_100ml(self) -> float:
+        return self.__fat_per_100ml
+
+    def get_carbs_per_100ml(self) -> float:
+        return self.__carbs_per_100ml
+
+    def get_nutrition(self, volume_ml: float) -> dict:
         if volume_ml <= 0:
             raise ValueError("Об'єм напою має бути більшим за 0 ml!")
 
@@ -50,4 +58,15 @@ class BeverageProduct(NutritionItem):
             "protein": round(self.__protein_per_100ml * factor, 2),
             "fat": round(self.__fat_per_100ml * factor, 2),
             "carbs": round(self.__carbs_per_100ml * factor, 2),
+        }
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "BeverageProduct",
+            "name": self.get_name(),
+            "calories_per_100ml": self.__calories_per_100ml,
+            "protein_per_100ml": self.__protein_per_100ml,
+            "fat_per_100ml": self.__fat_per_100ml,
+            "carbs_per_100ml": self.__carbs_per_100ml,
+            "is_carbonated": self.__is_carbonated,
         }
