@@ -3,7 +3,6 @@ from nutrition_item import NutritionItem
 
 class FoodProduct(NutritionItem):
 
-
     def __init__(
         self,
         name: str,
@@ -45,7 +44,6 @@ class FoodProduct(NutritionItem):
         return self.__carbs_per_100g
 
     def get_nutrition(self, weight_grams: float) -> dict:
-
         if weight_grams <= 0:
             raise ValueError("Вага порції має бути більшою за 0!")
 
@@ -55,4 +53,14 @@ class FoodProduct(NutritionItem):
             "protein": round(self.__protein_per_100g * factor, 2),
             "fat": round(self.__fat_per_100g * factor, 2),
             "carbs": round(self.__carbs_per_100g * factor, 2),
+        }
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "FoodProduct",
+            "name": self.get_name(),
+            "calories_per_100g": self.__calories_per_100g,
+            "protein_per_100g": self.__protein_per_100g,
+            "fat_per_100g": self.__fat_per_100g,
+            "carbs_per_100g": self.__carbs_per_100g,
         }

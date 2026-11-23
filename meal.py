@@ -104,47 +104,16 @@ class Meal:
         return item.get_nutrition(weight)
 
     def to_dict(self) -> dict:
-        items_data = []
-        for entry in self.__items:
-            item = entry["item"]
-            weight = entry["weight_grams"]
-
-            if isinstance(item, FoodProduct):
-                item_dict = {
-                    "type": "FoodProduct",
-                    "name": item.get_name(),
-                    "calories_per_100g": item.get_calories_per_100g(),
-                    "protein_per_100g": item.get_protein_per_100g(),
-                    "fat_per_100g": item.get_fat_per_100g(),
-                    "carbs_per_100g": item.get_carbs_per_100g(),
+        return {
+            "name": self.__name,
+            "items": [
+                {
+                    "item": entry["item"].to_dict(),
+                    "weight_grams": entry["weight_grams"],
                 }
-            elif isinstance(item, Dish):
-                macro = item.get_nutrition(item.get_total_weight_grams())
-                item_dict = {
-                    "type": "Dish",
-                    "name": item.get_name(),
-                    "total_weight_grams": item.get_total_weight_grams(),
-                    "total_calories": macro["calories"],
-                    "total_protein": macro["protein"],
-                    "total_fat": macro["fat"],
-                    "total_carbs": macro["carbs"],
-                }
-            elif isinstance(item, BeverageProduct):
-                item_dict = {
-                    "type": "BeverageProduct",
-                    "name": item.get_name(),
-                    "calories_per_100ml": item.get_calories_per_100ml(),
-                    "protein_per_100ml": 0.0,  # За наявності геттерів у BeverageProduct
-                    "fat_per_100ml": 0.0,
-                    "carbs_per_100ml": 0.0,
-                    "is_carbonated": item.is_carbonated(),
-                }
-            else:
-                continue
-
-            items_data.append({"item": item_dict, "weight_grams": weight})
-
-        return {"name": self.__name, "items": items_data}
+                for entry in self.__items
+            ],
+        }
 
     @classmethod
     def from_dict(cls, data: dict) -> "Meal":
