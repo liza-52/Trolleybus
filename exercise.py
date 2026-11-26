@@ -43,6 +43,16 @@ class Exercise:
     def get_advice(self) -> str:
         return "Займайтесь у комфортному темпі."
 
+    def get_recommended_duration_min(self) -> int:
+        return 30
+
+    def get_intensity_level(self) -> str:
+        if self.__met < 3.0:
+            return "низька"
+        if self.__met < 6.0:
+            return "середня"
+        return "висока"
+
     def to_dict(self) -> dict:
         return {"activity_type": self.__activity_type, "met": self.__met}
 
